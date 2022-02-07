@@ -40,7 +40,7 @@ class InstaBot:
                 self.like_counter += 1
                 logging.info(f'"{self.username}" liked a post; media_id: {media_id} - Count: {self.like_counter}')
                 time.sleep(like_time)
-            if self.like_counter % 45 == 0:
+            if self.like_counter % 15 == 0:
                 # --- UI MSG ---
                 UI_messages.add(f"`{self.username}` have liked `{self.like_counter}` posts and more so far")
         return True
@@ -62,7 +62,7 @@ class InstaBot:
                 UI_messages.add("Time ended, I stopped 🥲")
                 return None
             response = self.api.usertag_feed(user_id, **{'max_id': next_max_id})
-            time.sleep(7)
+            time.sleep(8)
             for i in range(int(response['num_results'])):
                 post_id = response['items'][i]['id']
                 has_liked = response['items'][i]['has_liked']
@@ -115,5 +115,4 @@ class Bot:
 
 
 if __name__ == '__main__':
-    bot = Bot(start_time='12:56', end_time='13:30', like_time='3')
-    bot.schedule_and_run(username='Samane_phl', password='myz..sch', target_account='joel_sentences', proxy=False)
+    pass

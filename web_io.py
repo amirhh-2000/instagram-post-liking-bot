@@ -72,7 +72,7 @@ def app(creepy_accounts: dict[str, list], target_account: str, start_time: str, 
             put_markdown(f"I run `{username}` from **{bot.start_time}** to **{bot.end_time}** o'clock", scope='scrollable')
             put_markdown(f"*`{username}` scheduled successfully*", scope='scrollable')
             # Run the creepies [with Smile ;)]
-            time.sleep(5)
+            time.sleep(7)
             job_thread = threading.Thread(target=bot.schedule_and_run, args=(username, password, target_account, proxy))
             job_thread.start()
             jobs.append(job_thread)
