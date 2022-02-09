@@ -23,6 +23,11 @@ def validate_username(p: str) -> str:
         return 'Please enter without "@" character!'
 
 
+def validate_api_delay_time(p: float) -> str:
+    if p < 5:
+        return 'At least 5 seconds!'
+
+
 def file_content_parsing(content: bin) -> dict:
     accounts = {}
     content = content.decode('ascii')
@@ -50,30 +55,47 @@ def ui_messages():
         time.sleep(1)
 
 
-def app(creepy_accounts: dict[str, list], target_account: str, start_time: str, end_time: str, like_time: str) -> None:
+def app(creepy_accounts: dict[str, list], **kwargs) -> None:
+    target_account: str = kwargs['target_account']
+    start_time: str = kwargs['start_time']
+    end_time: str = kwargs['end_time']
+    like_time: str = kwargs['like_time']
+    api_delay: str = kwargs['api_delay']
+
     with open('bot.png', 'rb') as photo:
         put_image(photo.read(), width='10%', height='10%', position=-1)
     with put_loading(shape='border', color='info'):
         put_text("Hello :) i'm running 🤭")
         put_scrollable(put_scope('scrollable'), height=420, keep_bottom=True)
         put_markdown(f"Time between each like set as `{like_time}` seconds", scope='scrollable')
-        jobs = []
-        # Handle UI messages
+        # Handles UI messages
+        jobs = []  # For threads
         job_thread = threading.Thread(target=ui_messages)
         job_thread.start()
         jobs.append(job_thread)
         # Creating bot instance for each account
         for username, passwd_and_proxy in creepy_accounts.items():
-            print(username, passwd_and_proxy)  # TODO: TEST
+            print(f'Username: "{username}" - Password: "{passwd_and_proxy[0]}"')  # To show log to end-user
             password = passwd_and_proxy[0]
             proxy = passwd_and_proxy[1]
 
-            bot = Bot(start_time=start_time, end_time=end_time, like_time=like_time)
-            put_markdown(f"I run `{username}` from **{bot.start_time}** to **{bot.end_time}** o'clock", scope='scrollable')
+            bot = Bot(
+                start_time=start_time,
+                end_time=end_time,
+                like_time=like_time,
+                api_delay=api_delay,
+            )
+            put_markdown(
+                f"I run `{username}` from **{bot.start_time}** to **{bot.end_time}** o'clock",
+                scope='scrollable',
+            )
             put_markdown(f"*`{username}` scheduled successfully*", scope='scrollable')
             # Run the creepies [with Smile ;)]
             time.sleep(7)
-            job_thread = threading.Thread(target=bot.schedule_and_run, args=(username, password, target_account, proxy))
+            job_thread = threading.Thread(
+                target=bot.schedule_and_run,
+                args=(username, password, target_account, proxy),
+            )
             job_thread.start()
             jobs.append(job_thread)
         for job in jobs:
@@ -102,8 +124,21 @@ def main():
     scheduling = input_group("Scheduling", [
         input("Start time", name="start_t", type=TIME, placeholder="start time"),
         input("End time", name="end_t", type=TIME, placeholder="end time"),
-        input("How many seconds to wait for each like?", name="like_t", type=FLOAT,
-              placeholder="time between each like"),
+        input(
+            "How many seconds to wait for each like?",
+            name="like_t",
+            type=FLOAT,
+            placeholder="time between each like",
+            required=True,
+        ),
+        input(
+            "API call delay time",
+            name="api_delay",
+            type=FLOAT,
+            placeholder="delays between each API call",
+            validate=validate_api_delay_time,
+            required=True,
+        ),
     ])
 
     # Creepy accounts
@@ -126,6 +161,7 @@ def main():
     s_t = scheduling['start_t']
     e_t = scheduling['end_t']
     l_t = scheduling['like_t']
+    api_delay = scheduling['api_delay']
     # Popup
     with popup('The scheduling was done as follows:') as pop:
         put_text(f"Start time: {s_t}\nEnd time: {e_t}")
@@ -137,6 +173,7 @@ def main():
         start_time=s_t,
         end_time=e_t,
         like_time=l_t,
+        api_delay=api_delay,
     )
 
 

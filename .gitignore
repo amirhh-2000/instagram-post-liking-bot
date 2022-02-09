@@ -9,7 +9,6 @@
 /temp/
 /venv/
 *.zip
-*.spec
 *.txt
 !requirements.txt
 # User-specific stuff

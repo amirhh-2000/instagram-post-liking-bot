@@ -16,10 +16,11 @@ time_frame = dict()  # For scheduling
 
 
 class InstaBot:
-    def __init__(self, username: str, password: str, target_account: str, proxy=False):
+    def __init__(self, username: str, password: str, target_account: str, api_call_delay: float, proxy=False):
         self.username = username
         self.password = password
         self.target_account = target_account
+        self.api_call_delay = api_call_delay
         if proxy:
             self.api = Client(username, password, proxy=proxy)
         else:
@@ -36,7 +37,7 @@ class InstaBot:
         for media_id in self._tagged_post_ids(user_id):
             if media_id:
                 self.api.post_like(media_id)
-                print(f"{self.username} liked a post")  # TODO: TEST
+                print(f"'{self.username}' liked a post")  # To show log to end-user
                 self.like_counter += 1
                 logging.info(f'"{self.username}" liked a post; media_id: {media_id} - Count: {self.like_counter}')
                 time.sleep(like_time)
@@ -62,7 +63,7 @@ class InstaBot:
                 UI_messages.add("Time ended, I stopped 🥲")
                 return None
             response = self.api.usertag_feed(user_id, **{'max_id': next_max_id})
-            time.sleep(8)
+            time.sleep(self.api_call_delay)
             for i in range(int(response['num_results'])):
                 post_id = response['items'][i]['id']
                 has_liked = response['items'][i]['has_liked']
@@ -75,10 +76,11 @@ class InstaBot:
 
 
 class Bot:
-    def __init__(self, start_time: str, end_time: str, like_time: str):
-        self.start_time = start_time
-        self.end_time = end_time
-        self.like_time = float(like_time)
+    def __init__(self, **kwargs):
+        self.start_time: str = kwargs['start_time']
+        self.end_time: str = kwargs['end_time']
+        self.like_time: float = float(kwargs['like_time'])
+        self.api_delay: float = float(kwargs['api_delay'])
         logging.info(f'Bot is scheduling...')
 
     def schedule_and_run(self, username, password, target_account, proxy):
@@ -101,7 +103,13 @@ class Bot:
         while True:
             current_time = datetime.now()
             if start_time <= current_time:
-                insta_bot_instance = InstaBot(username=username, password=password, target_account=target_account, proxy=proxy)
+                insta_bot_instance = InstaBot(
+                    username=username,
+                    password=password,
+                    target_account=target_account,
+                    api_call_delay=self.api_delay,
+                    proxy=proxy,
+                )
                 result = insta_bot_instance.job(self.like_time)
                 time.sleep(3)
                 if result:
