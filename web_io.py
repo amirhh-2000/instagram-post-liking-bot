@@ -23,25 +23,24 @@ def validate_username(p: str) -> str:
         return 'Please enter without "@" character!'
 
 
-def validate_api_delay_time(p: float) -> str:
-    if p < 5:
-        return 'At least 5 seconds!'
-
-
-def file_content_parsing(content: bin) -> dict:
-    accounts = {}
+def file_parser(content: bin, read_proxies: bool = False) -> dict or list:
     content = content.decode('ascii')
     content = content.split("\r\n")
     if not content[-1]:
         content = content[:-1]
-    for item in content:
-        item = item.split(' ')
-        if len(item) == 2:
-            item.append(False)
-        username = item[0]
-        pass_and_proxy = item[1:]
-        accounts[username] = pass_and_proxy
-    return accounts
+    if read_proxies:
+        proxies_lst = []
+        for line in content:
+            proxies_lst.append(line.strip())
+        return proxies_lst
+    else:
+        accounts = {}
+        for line in content:
+            item = line.split(' ')
+            username = item[0].strip()
+            passwd = item[1].strip()
+            accounts[username] = passwd
+        return accounts
 
 
 def ui_messages():
@@ -61,6 +60,7 @@ def app(creepy_accounts: dict[str, list], **kwargs) -> None:
     end_time: str = kwargs['end_time']
     like_time: str = kwargs['like_time']
     api_delay: str = kwargs['api_delay']
+    proxies: list = kwargs['proxies']
 
     with open('bot.png', 'rb') as photo:
         put_image(photo.read(), width='10%', height='10%', position=-1)
@@ -74,10 +74,8 @@ def app(creepy_accounts: dict[str, list], **kwargs) -> None:
         job_thread.start()
         jobs.append(job_thread)
         # Creating bot instance for each account
-        for username, passwd_and_proxy in creepy_accounts.items():
-            print(f'Username: "{username}" - Password: "{passwd_and_proxy[0]}"')  # To show log to end-user
-            password = passwd_and_proxy[0]
-            proxy = passwd_and_proxy[1]
+        for username, password in creepy_accounts.items():
+            print(f'Username: "{username}" - Password: "{password}"')  # To show log to end-user
 
             bot = Bot(
                 start_time=start_time,
@@ -94,7 +92,7 @@ def app(creepy_accounts: dict[str, list], **kwargs) -> None:
             time.sleep(7)
             job_thread = threading.Thread(
                 target=bot.schedule_and_run,
-                args=(username, password, target_account, proxy),
+                args=(username, password, target_account, proxies),
             )
             job_thread.start()
             jobs.append(job_thread)
@@ -104,15 +102,21 @@ def app(creepy_accounts: dict[str, list], **kwargs) -> None:
 
 
 def main():
-    info = input_group("Accounts", [
+    info = input_group("Bot Settings", [
         input("Input your username: ", name="username", type=TEXT, placeholder="Username", validate=validate_username),
         input("Input your password: ", name="password", type=PASSWORD, placeholder="Password"),
+        file_upload(
+            "Or read the list of accounts from the file[txt] (optional): ",
+            name="accounts",
+            accept="file/txt",
+            required=False,
+        ),
         input("Input a proxy (optional): ", name="proxy", type=TEXT, placeholder="Proxy", required=False),
         file_upload(
-            "Or select a txt file for accounts and proxies: ",
-            name="accounts",
-            accept="file/*",
-            required=False
+            "Or select the file[txt] containing the proxies (optional): ",
+            name="proxies",
+            accept="file/txt",
+            required=False,
         ),
         input(
             "Target account: ", name="target", type=TEXT,
@@ -132,12 +136,11 @@ def main():
             required=True,
         ),
         input(
-            "API call delay time",
+            "API call delay time (optional; at lest 5 seconds recommended)",
             name="api_delay",
             type=FLOAT,
             placeholder="delays between each API call",
-            validate=validate_api_delay_time,
-            required=True,
+            required=False,
         ),
     ])
 
@@ -146,14 +149,22 @@ def main():
     creepy_password = info['password']
     # Check file exists
     accounts_file = info['accounts']
+    proxies_file = info['proxies']
+    # Accounts
     accounts = {}
     if accounts_file:
         file_content = info['accounts']['content']
-        accounts = file_content_parsing(file_content)
+        accounts = file_parser(file_content)
     else:
-        accounts[creepy_username] = [creepy_password, None]
-        if info['proxy']:
-            accounts[creepy_username][1] = info['proxy']
+        accounts[creepy_username] = creepy_password
+    # Proxies
+    if proxies_file:
+        file_content = info['proxies']['content']
+        proxies = file_parser(file_content, read_proxies=True)
+    elif info['proxy']:
+        proxies = [info['proxy']]
+    else:
+        proxies = []
 
     # Target account
     target_account = info['target']
@@ -162,6 +173,8 @@ def main():
     e_t = scheduling['end_t']
     l_t = scheduling['like_t']
     api_delay = scheduling['api_delay']
+    if not api_delay:
+        api_delay = 7
     # Popup
     with popup('The scheduling was done as follows:') as pop:
         put_text(f"Start time: {s_t}\nEnd time: {e_t}")
@@ -174,6 +187,7 @@ def main():
         end_time=e_t,
         like_time=l_t,
         api_delay=api_delay,
+        proxies=proxies,
     )
 
 

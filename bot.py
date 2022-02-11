@@ -1,4 +1,5 @@
 import time
+import random
 from datetime import datetime
 import logging
 
@@ -16,13 +17,14 @@ time_frame = dict()  # For scheduling
 
 
 class InstaBot:
-    def __init__(self, username: str, password: str, target_account: str, api_call_delay: float, proxy=False):
+    def __init__(self, username: str, password: str, target_account: str, api_call_delay: float, proxies: list):
         self.username = username
         self.password = password
         self.target_account = target_account
         self.api_call_delay = api_call_delay
-        if proxy:
-            self.api = Client(username, password, proxy=proxy)
+        if proxies:
+            a_proxy_index: int = random.randint(0, len(proxies))
+            self.api = Client(username, password, proxy=proxies[a_proxy_index])
         else:
             self.api = Client(username, password)
         self.like_counter = 0
@@ -83,7 +85,7 @@ class Bot:
         self.api_delay: float = float(kwargs['api_delay'])
         logging.info(f'Bot is scheduling...')
 
-    def schedule_and_run(self, username, password, target_account, proxy):
+    def schedule_and_run(self, username: str, password: str, target_account: str, proxies: list):
         current_time = datetime.now()
         # Start time
         s_hour, s_minute = self.start_time[:2], self.start_time[3:]
@@ -108,7 +110,7 @@ class Bot:
                     password=password,
                     target_account=target_account,
                     api_call_delay=self.api_delay,
-                    proxy=proxy,
+                    proxies=proxies,
                 )
                 result = insta_bot_instance.job(self.like_time)
                 time.sleep(3)
