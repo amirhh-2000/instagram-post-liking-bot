@@ -23,7 +23,7 @@ class InstaBot:
         self.target_account = target_account
         self.api_call_delay = api_call_delay
         if proxies:
-            a_proxy_index: int = random.randint(0, len(proxies))
+            a_proxy_index: int = random.randint(0, len(proxies) - 1)
             self.api = Client(username, password, proxy=proxies[a_proxy_index])
         else:
             self.api = Client(username, password)
@@ -33,6 +33,7 @@ class InstaBot:
         UI_messages.add(f"I'm logged in as `{username}`")
 
     def job(self, like_time: float) -> bool:
+        """Program main flow; calls the API and like"""
         # --- UI MSG ---
         UI_messages.add(f"`{self.username}` is liking...")
         user_id = self._get_user_id(self.target_account)

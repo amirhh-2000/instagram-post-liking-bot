@@ -10,6 +10,7 @@
 /venv/
 *.zip
 *.txt
+*.pdf
 !requirements.txt
 # User-specific stuff
 .idea/**/workspace.xml

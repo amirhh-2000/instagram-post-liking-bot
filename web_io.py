@@ -36,7 +36,7 @@ def file_parser(content: bin, read_proxies: bool = False) -> dict or list:
     else:
         accounts = {}
         for line in content:
-            item = line.split(' ')
+            item = line.split()
             username = item[0].strip()
             passwd = item[1].strip()
             accounts[username] = passwd
