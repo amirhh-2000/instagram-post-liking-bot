@@ -1,6 +1,4 @@
-## Run instructions
-- You must run file **"\output\web_io\web_io.exe"** to run the program
-- You can see the program log in the **"\output\web_io\report.log"** file
+# Run instructions
 
 ## Input
 #### **NOTE: The program also works without a proxy. Therefore, the use of a proxy is not recommended.**
