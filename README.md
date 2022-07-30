@@ -1,5 +1,8 @@
 # Run instructions
 
+## Run
+`> python web_io.py`
+
 ## Input
 #### **NOTE: The program also works without a proxy. Therefore, the use of a proxy is not recommended.**
 - If you have a list of accounts, you do not need to fill in the first two fields;
