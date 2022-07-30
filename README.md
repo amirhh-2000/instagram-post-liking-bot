@@ -1,4 +1,4 @@
-# Run instructions
+# Instagram Post Liker
 
 ## Run
 `> python web_io.py`
