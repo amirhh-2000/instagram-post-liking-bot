@@ -1,5 +1,3 @@
 # How can i contribute?
 
-
-</br>
-_Thanks and best regards._
+- Commit your changes on `develop` branch <br>
