@@ -1,4 +1,9 @@
 # Instagram Post Liker
+You can:
+- register multiple accounts to like
+- determine the start and end time of the bot
+<br>
+This bot likes the **tagged feed** of target account.
 
 ## Run
 `> python web_io.py`
