@@ -1,4 +1,4 @@
-# Instagram Post Liker
+# Instagram Post Liking Bot
 You can:
 - like the **tagged feed** of target account 
 - register multiple accounts to like
