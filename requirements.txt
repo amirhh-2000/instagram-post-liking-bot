@@ -21,7 +21,7 @@ pyparsing==3.0.7
 pywebio==1.5.2
 pywin32-ctypes==0.2.0
 requests==2.27.1
-tornado==6.3.2
+tornado==6.4.2
 ua-parser==0.10.0
 urllib3==1.26.8
 user-agents==2.2.0
